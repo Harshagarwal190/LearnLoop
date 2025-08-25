@@ -1,0 +1,219 @@
+{
+  "name": "harsh",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "e06d11e8-f45a-4279-adf9-f3916520f95a",
+      "name": "Daily Learning Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "2025a91a-f057-4ccc-ac98-79adaebeeb39",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        224
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ofvMOkJthrMiuG80",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.duckduckgo.com/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "=programming tutorials questions {{ new Date().getFullYear() }}"
+            },
+            {
+              "name": "format",
+              "value": "json"
+            },
+            {
+              "name": "no_html",
+              "value": "1"
+            },
+            {
+              "name": "skip_disambig",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "77b12904-ce41-4945-a5c4-7d9360b6c6ca",
+      "name": "Web Search Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are an expert programming tutor who creates high-quality, placement-focused MCQ questions. Your task is to generate a JSON array containing 2 questions for each of the following topics: DSA, OS, CN, OOPs, DBMS, and SQL.\n\nInstructions:\n\nBase the questions on concepts commonly found on platforms like GeeksforGeeks, LeetCode, and InterviewBit.\n\nEnsure questions vary in difficulty from easy to hard and cover both theoretical and practical aspects.\n\nThe final output MUST be a single, valid JSON array [] containing all the question objects. Do not include any text or explanations outside of the JSON structure.\n\nJSON Object Structure:\nEach question must be a JSON object with the following keys:\n\ntopic: The subject category (e.g., \"DSA\").\n\ndifficulty: \"Easy\", \"Medium\", or \"Hard\".\n\nquestion: The question text.\n\noptions: A JSON object with keys \"A\", \"B\", \"C\", \"D\".\n\nanswer: The correct option key (e.g., \"C\").\n\nexplanation: A brief explanation of why the answer is correct.\n",
+        "options": {
+          "systemMessage": "You are an expert programming tutor who creates high-quality MCQ questions for placement preparation. Your task is to search for and generate 2-3 questions each for: Data Structures & Algorithms (DSA), Operating Systems (OS), Computer Networks (CN), Object-Oriented Programming (OOPs), Database Management Systems (DBMS), and SQL. Search multiple learning platforms like GeeksforGeeks, LeetCode, InterviewBit, HackerRank, and other educational websites. Focus on: 1) Recent and trending topics 2) Commonly asked interview questions 3) Conceptual clarity 4) Practical applications 5) Varying difficulty levels (easy to hard). For each question, provide: - Clear question statement - 4 multiple choice options (A, B, C, D) - Correct answer with explanation - Topic/concept being tested - Difficulty level. Make questions that test both theoretical knowledge and practical problem-solving skills."
+        }
+      },
+      "id": "ceae0373-50f7-40ef-b717-2389bac44d2d",
+      "name": "Question Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('recipient_email') }}",
+        "subject": "={{ $fromAI('email_subject') }}",
+        "message": "={{ $fromAI('email_content') }}",
+        "options": {}
+      },
+      "id": "72da067d-b3cf-4515-a4ae-c33f9e83de60",
+      "name": "Gmail Sender Tool",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        656,
+        224
+      ],
+      "webhookId": "7d40cc49-dfb5-4da0-9ad1-69b493c5f71c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SUyK2x7skgsv0Bct",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are an email formatting specialist. Take the programming questions generated by the previous agent and format them into a professional, well-structured HTML email for daily learning. Create an engaging email with: 1) Professional subject line like \"Daily Programming Practice - [Current Date] - DSA, OS, CN, OOPs, DBMS & SQL Questions\" 2) Proper HTML formatting with sections for each topic 3) Clear question numbering and formatting 4) Highlighted correct answers and explanations 5) Motivational introduction and closing 6) Clean, readable layout with proper spacing. The email should be sent to the user for their daily practice. Make it visually appealing and easy to read on both desktop and mobile.",
+        "options": {
+          "systemMessage": "You are an email formatting specialist. Take the programming questions generated by the previous agent and format them into a professional, well-structured HTML email for daily learning. Create an engaging email with: 1) Professional subject line like \"Daily Programming Practice - [Current Date] - DSA, OS, CN, OOPs, DBMS & SQL Questions\" 2) Proper HTML formatting with sections for each topic 3) Clear question numbering and formatting 4) Highlighted correct answers and explanations 5) Motivational introduction and closing 6) Clean, readable layout with proper spacing. The email should be sent to the user for their daily practice. Make it visually appealing and easy to read on both desktop and mobile."
+        }
+      },
+      "id": "ed8b3b46-28b1-4744-b4d4-99f9522179c5",
+      "name": "Email Composer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily Learning Trigger": {
+      "main": [
+        [
+          {
+            "node": "Question Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Question Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Email Composer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Search Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Question Generator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Question Generator Agent": {
+      "main": [
+        [
+          {
+            "node": "Email Composer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Sender Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Composer Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "04f092af-15fe-4d0b-9d8a-27e33bdf0e41",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9ee4acc8b94850e422bd048afe31230c98e0b91eb185e3654dacdc91cc546228"
+  },
+  "id": "HA2awSYPVsKzQwvO",
+  "tags": []
+}
